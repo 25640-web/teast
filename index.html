@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบบันทึกข้อมูลนักเรียน</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body class="bg-gradient-to-br from-slate-100 to-blue-50 min-h-screen flex items-center justify-center p-4">
+
+    <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-lg border border-slate-100">
+        <h2 class="text-2xl font-bold text-center text-slate-800 mb-2">📝 ฟอร์มข้อมูลนักเรียน</h2>
+        <p class="text-center text-sm text-slate-500 mb-6">กรอกข้อมูลให้ครบถ้วนเพื่อบันทึกลง Google Sheets</p>
+        
+        <form id="studentForm" class="space-y-4">
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">คำนำหน้า</label>
+                    <select id="prefix" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                        <option value="">เลือก...</option>
+                        <option value="เด็กชาย">เด็กชาย</option>
+                        <option value="เด็กหญิง">เด็กหญิง</option>
+                        <option value="นาย">นาย</option>
+                        <option value="นางสาว">นางสาว</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">ชื่อ</label>
+                    <input type="text" id="firstName" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">นามสกุล</label>
+                    <input type="text" id="lastName" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">ชั้น ม.</label>
+                    <select id="grade" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                        <option value="1">ม.1</option>
+                        <option value="2">ม.2</option>
+                        <option value="3">ม.3</option>
+                        <option value="4">ม.4</option>
+                        <option value="5">ม.5</option>
+                        <option value="6">ม.6</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">ห้อง</label>
+                    <input type="text" id="room" required placeholder="เช่น 1" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">เลขที่</label>
+                    <input type="number" id="number" required min="1" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">น้ำหนัก (กก.)</label>
+                    <input type="number" id="weight" step="0.1" required placeholder="0.0" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">ส่วนสูง (ซม.)</label>
+                    <input type="number" id="height" step="0.1" required placeholder="0.0" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+            </div>
+
+            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition duration-200 mt-4 shadow-md">
+                🚀 ส่งข้อมูลเข้า Google Sheets
+            </button>
+        </form>
+    </div>
+
+    <script>
+        // ✅ อัปเดตเป็น URL ใหม่ของคุณเรียบร้อยแล้วครับ
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxCALnJ9rV7B5pED1KxZ37cn7uIsIxo3cC2rqcCd-xb8kVhkOKVpohsw9aKxn-qRf4UUg/exec";
+
+        document.getElementById('studentForm').addEventListener('submit', function(e) {
+            e.preventDefault(); // ป้องกันการรีเฟรชหน้าจอหลังจากกดปุ่ม
+
+            // 1. แสดง SweetAlert สปินเนอร์หมุนๆ ในขณะที่รอการบันทึกข้อมูล
+            Swal.fire({
+                title: 'กำลังเชื่อมต่อ...',
+                text: 'ระบบกำลังนำข้อมูลของคุณบันทึกลง Google Sheets โปรดรอสักครู่',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            // 2. รวบรวมข้อมูลจากอินพุตในฟอร์มใส่ในวัตถุ (Object)
+            const formData = {
+                prefix: document.getElementById('prefix').value,
+                firstName: document.getElementById('firstName').value,
+                lastName: document.getElementById('lastName').value,
+                grade: document.getElementById('grade').value,
+                room: document.getElementById('room').value,
+                number: document.getElementById('number').value,
+                weight: document.getElementById('weight').value,
+                height: document.getElementById('height').value
+            };
+
+            // 3. เรียกฟังก์ชันส่งข้อมูลแบบ JSONP
+            sendJSONP(WEB_APP_URL, formData);
+        });
+
+        // ฟังก์ชันในการส่งข้อมูลด้วยวิธี JSONP เพื่อหลีกเลี่ยงข้อจำกัดเรื่อง Cross-Origin (CORS)
+        function sendJSONP(url, data) {
+            // สุ่มชื่อฟังก์ชันสำหรับ Callback เพื่อให้ไม่ซ้ำกันในแต่ละครั้งที่ส่งข้อมูล
+            const callbackName = 'jsonp_callback_' + Math.round(100000 * Math.random());
+            
+            // ประกาศฟังก์ชัน callback ชั่วคราวไว้บนระดับ window เพื่อรอการเรียกใช้งานกลับจากฝั่ง Google
+            window[callbackName] = function(response) {
+                // เมื่อได้รับข้อมูลตอบกลับสำเร็จ ให้ลบแท็กสคริปต์ชั่วคราวทิ้งทันทีเพื่อประสิทธิภาพของแรม
+                delete window[callbackName];
+                document.body.removeChild(script);
+
+                // ตรวจสอบสถานะการตอบกลับจาก Google Apps Script
+                if (response && response.status === 'success') {
+                    // แสดง SweetAlert บันทึกสำเร็จ
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'บันทึกสำเร็จ!',
+                        text: response.message,
+                        confirmButtonColor: '#2563eb'
+                    });
+                    document.getElementById('studentForm').reset(); // ล้างข้อมูลในฟอร์มให้ว่างพร้อมกรอกใหม่
+                } else {
+                    // แสดง SweetAlert แจ้งข้อผิดพลาดฝั่งเซิร์ฟเวอร์
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'เกิดข้อผิดพลาด',
+                        text: response.message || 'ไม่สามารถบันทึกข้อมูลได้',
+                        confirmButtonColor: '#dc2626'
+                    });
+                }
+            };
+
+            // แปลงข้อมูลจาก Object ให้กลายเป็น Query Parameters ต่อท้าย URL
+            const queryParams = new URLSearchParams(data);
+            queryParams.append('callback', callbackName); // ส่งชื่อฟังก์ชัน callback ติดพ่วงไปด้วย
+
+            // สร้าง Element สคริปต์ขึ้นมาเพื่อส่งแบบ GET request ทะลุ Cross-origin
+            const script = document.createElement('script');
+            script.src = `${url}?${queryParams.toString()}`;
+            
+            // กรณีอินเทอร์เน็ตหลุด หรือ URL ของสคริปต์ไม่ถูกต้อง
+            script.onerror = function() {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'เชื่อมต่อไม่สำเร็จ',
+                    text: 'ไม่สามารถติดต่อกับฐานข้อมูลระบบได้ กรุณาตรวจสอบการตั้งค่า Deployment ของคุณ',
+                    confirmButtonColor: '#dc2626'
+                });
+                delete window[callbackName];
+                document.body.removeChild(script);
+            };
+
+            // แปะ Element สคริปต์ลงบน Body เพื่อสั่งให้มันเริ่มทำงานส่งข้อมูลทันที
+            document.body.appendChild(script);
+        }
+    </script>
+</body>
+</html>
